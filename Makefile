@@ -21,7 +21,7 @@ deploy-ecr:
 		--stack-name $(stackName)-ecr \
 		--parameter-overrides $(shell cat parameters.properties|grep ServiceName) \
 		--no-fail-on-empty-changeset \
-		--region $(shell cat parameters.properties|grep region)
+		--region $(region)
 
 	@aws cloudformation describe-stacks \
 		--stack-name $(stackName)-ecr \
