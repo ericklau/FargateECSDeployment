@@ -16,12 +16,11 @@ debug-master:
 	aws cloudformation describe-stack-events --stack-name $(stackName)-master
 
 deploy-ecr:
-	aws cloudformation deploy \
+	aws --region $(region) cloudformation deploy \
 		--template-file cloudformation-ecr.yaml \
 		--stack-name $(stackName)-ecr \
 		--parameter-overrides $(shell cat parameters.properties|grep ServiceName) \
-		--no-fail-on-empty-changeset \
-		--region $(region)
+		--no-fail-on-empty-changeset
 
 	@aws cloudformation describe-stacks \
 		--stack-name $(stackName)-ecr \
