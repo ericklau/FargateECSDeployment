@@ -16,8 +16,7 @@ debug-master:
 	aws cloudformation describe-stack-events --stack-name $(stackName)-master
 
 deploy-ecr:
-	export AWS_DEFAULT_REGION=$(region)
-	aws cloudformation deploy \
+	aws --region us-east-1 cloudformation deploy \
 		--template-file cloudformation-ecr.yaml \
 		--stack-name $(stackName)-ecr \
 		--parameter-overrides $(shell cat parameters.properties|grep ServiceName) \
