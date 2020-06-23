@@ -16,6 +16,7 @@ debug-master:
 	aws cloudformation describe-stack-events --stack-name $(stackName)-master
 
 deploy-ecr:
+	aws configure set region us-east-1
 	aws --region us-east-1 cloudformation deploy \
 		--template-file cloudformation-ecr.yaml \
 		--stack-name $(stackName)-ecr \
