@@ -17,7 +17,7 @@ debug-master:
 
 deploy-ecr:
 	aws configure set region us-east-1
-	aws --region us-east-1 cloudformation deploy \
+	aws --region $(region) cloudformation deploy \
 		--template-file cloudformation-ecr.yaml \
 		--stack-name $(stackName)-ecr \
 		--parameter-overrides $(shell cat parameters.properties|grep ServiceName) \
