@@ -208,7 +208,7 @@ Resources:
     Type: AWS::ECS::Service
     # This dependency is needed so that the load balancer is setup correctly in time
     DependsOn:
-      - ListenerHTTPS
+      - ListenerHTTP
     Properties:
       Cluster: !Ref Cluster
       TaskDefinition: !Ref TaskDefinition
@@ -260,9 +260,7 @@ Resources:
           Type: forward
       LoadBalancerArn: !Ref LoadBalancer
       Port: !Ref LoadBalancerPort
-      Protocol: HTTPS
-      Certificates:
-        - CertificateArn: !Ref Certificate
+      Protocol: HTTP
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -310,15 +308,6 @@ Resources:
       LoadBalancerAttributes:
       - Key: load_balancing.cross_zone.enabled
         Value: "true"
-  # DNSRecord:
-  #   Type: AWS::Route53::RecordSet
-  #   Properties:
-  #     HostedZoneName: !Join ['', [!Ref HostedZoneName, .]]
-  #     Name: !Join ['', [!Ref Subdomain, ., !Ref HostedZoneName, .]]
-  #     Type: A
-  #     AliasTarget:
-  #       DNSName: !GetAtt LoadBalancer.DNSName
-  #       HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
