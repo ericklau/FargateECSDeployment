@@ -103,8 +103,8 @@ Resources:
             Value: !Ref AWS::AccountId
           - Name: JENKINS_SLAVE_AGENT_PORT
             Value: '50000'
-          - Name: AGENT_SECURITY_GROUP
-            Value: !GetAtt AgentSecurityGroup.GroupId
+          # - Name: AGENT_SECURITY_GROUP
+          #   Value: !GetAtt AgentSecurityGroup.GroupId
           - Name: SUBNETS
             Value: !Sub "${SubnetA},${SubnetB}"
           - Name: VPC
@@ -339,6 +339,6 @@ Outputs:
   # Endpoint:
   #   Description: Endpoint
   #   Value: !Join ['', ['https://', !Ref DNSRecord]]
-  AgentSG:
-    Description: security group id that needs to be used for agents
-    Value: !GetAtt AgentSecurityGroup.GroupId
+  # AgentSG:
+  #   Description: security group id that needs to be used for agents
+  #   Value: !GetAtt AgentSecurityGroup.GroupId
