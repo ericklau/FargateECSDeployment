@@ -181,10 +181,10 @@ Resources:
           FromPort: !Ref ContainerPort
           ToPort: !Ref ContainerPort
           SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 50000
-          ToPort: 50000
-          SourceSecurityGroupId: !Ref AgentSecurityGroup
+        # - IpProtocol: tcp
+        #   FromPort: 50000
+        #   ToPort: 50000
+        #   SourceSecurityGroupId: !Ref AgentSecurityGroup
         - IpProtocol: tcp
           FromPort: 50000
           ToPort: 50000
