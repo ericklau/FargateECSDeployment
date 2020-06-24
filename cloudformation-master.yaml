@@ -146,65 +146,18 @@ Resources:
               - "ecs:ListTaskDefinitions"
               - "ecs:DescribeTaskDefinition"
               - "ecs:DeregisterTaskDefinition"
-            Effect: Allow
-            Resource: "*"
-          -
-            Action:
               - "ecs:ListContainerInstances"
-            Effect: Allow
-            Resource: !GetAtt AgentCluster.Arn
-          -
-            Action:
               - "ecs:RunTask"
-            Effect: Allow
-            Condition:
-              ArnEquals:
-                ecs:cluster: !GetAtt AgentCluster.Arn
-            Resource: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/*"
-          -
-            Action:
               - "ecs:StopTask"
-            Effect: Allow
-            Condition:
-              ArnEquals:
-                ecs:cluster: !GetAtt AgentCluster.Arn
-            Resource: !Sub "arn:aws:ecs:*:*:task/*" # "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task/*"
-          -
-            Action:
               - "ecs:DescribeTasks"
-            Effect: Allow
-            Condition:
-              ArnEquals:
-                ecs:cluster: !GetAtt AgentCluster.Arn
-            Resource: !Sub "arn:aws:ecs:*:*:task/*" # "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task/*"
-          -
-            Action:
               - "iam:PassRole"
-            Effect: Allow
-            Resource: !Sub "arn:aws:iam::${AWS::AccountId}:role/*"
-          -
-            Action:
               - "ssm:GetParameter"
-            Effect: Allow
-            Resource:
-            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sample-application/*"
-          -
-            Action:
               - "ssm:PutParameter"
-            Effect: Allow
-            Resource:
-            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sample-application/*"
-          -
-            Action:
-            - "kms:Decrypt"
-            Effect: Allow
-            Resource:
-            - !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/ssm
-          -
-            Action:
+              - "kms:Decrypt"
               - "cloudwatch:PutMetricData"
             Effect: Allow
             Resource: "*"
+            
   # A role needed for auto scaling
   AutoScalingRole:
     Type: AWS::IAM::Role
