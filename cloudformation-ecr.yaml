@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Template for Jenkins Master on Fargate with EFS - ECR repo
+Description: Template for sample application on Fargate with EFS - ECR repo
 Parameters:
   ServiceName:
     Type: String
@@ -38,13 +38,13 @@ Resources:
   ECRParam:
     Type: AWS::SSM::Parameter
     Properties:
-      Description: Docker repo URI for jenkins master
-      Name: '/jenkins/docker-uri'
+      Description: Docker repo URI for sample-application
+      Name: '/sample-application/docker-uri'
       Type: 'String'
       Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepository}
 Outputs:
   ECRURI:
-    Description: URI of jenkins master repo
+    Description: URI of sample-application repo
     Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepository}
     Export:
       Name: !Sub ${ServiceName}-docker-uri
