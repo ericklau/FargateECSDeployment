@@ -91,12 +91,12 @@ Resources:
             Value: !GetAtt LoadBalancer.DNSName
           - Name: NLB_PORT
             Value: '50000'
-          - Name: NLB_TARGET_GROUP_ARN
-            Value: !Ref NetworkLoadBalancerTargetGroup
-          - Name: NLB_DNS_NAME
-            Value: !GetAtt NetworkLoadBalancer.DNSName
-          - Name: ECS_AGENT_CLUSTER
-            Value: !GetAtt AgentCluster.Arn
+          # - Name: NLB_TARGET_GROUP_ARN
+          #   Value: !Ref NetworkLoadBalancerTargetGroup
+          # - Name: NLB_DNS_NAME
+          #   Value: !GetAtt NetworkLoadBalancer.DNSName
+          # - Name: ECS_AGENT_CLUSTER
+          #   Value: !GetAtt AgentCluster.Arn
           - Name: AWS_DEFAULT_REGION
             Value: !Ref AWS::Region
           - Name: ACCOUNT_ID
@@ -157,7 +157,7 @@ Resources:
               - "cloudwatch:PutMetricData"
             Effect: Allow
             Resource: "*"
-            
+
   # A role needed for auto scaling
   AutoScalingRole:
     Type: AWS::IAM::Role
@@ -232,9 +232,9 @@ Resources:
         - ContainerName: !Ref ServiceName
           ContainerPort: !Ref ContainerPort
           TargetGroupArn: !Ref TargetGroup
-        - ContainerName: !Ref ServiceName
-          ContainerPort: 50000
-          TargetGroupArn: !Ref NetworkLoadBalancerTargetGroup
+        # - ContainerName: !Ref ServiceName
+        #   ContainerPort: 50000
+        #   TargetGroupArn: !Ref NetworkLoadBalancerTargetGroup
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
