@@ -17,7 +17,7 @@ Parameters:
     Default: ECSJenkins
   ContainerPort:
     Type: Number
-    Default: 8080
+    Default: 3000
   LoadBalancerPort:
     Type: Number
     Default: 443
