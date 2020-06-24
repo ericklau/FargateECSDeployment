@@ -7,10 +7,10 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
   SubnetB:
     Type: AWS::EC2::Subnet::Id
-  Certificate:
-    Type: String
-    # Update with the certificate ARN from Certificate Manager, which must exist in the same region.
-    Default: 'arn:aws:iam::346201684737:server-certificate/ExampleCertificate'
+#   Certificate:
+#     Type: String
+#     # Update with the certificate ARN from Certificate Manager, which must exist in the same region.
+#     Default: 'arn:aws:iam::346201684737:server-certificate/ExampleCertificate'
   ServiceName:
     Type: String
     # update with the name of the service
@@ -24,21 +24,21 @@ Parameters:
   HealthCheckPath:
     Type: String
     Default: /
-  HostedZoneName:
-    Type: String
-    Default: company.com
-  Subdomain:
-    Type: String
-    Default: jenkins
+#   HostedZoneName:
+#     Type: String
+#     Default: company.com
+#   Subdomain:
+#     Type: String
+#     Default: jenkins
 Resources:
   Cluster:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: !Join ['', [!Ref ServiceName, Cluster]]
-  AgentCluster:
-    Type: AWS::ECS::Cluster
-    Properties:
-      ClusterName: !Join ['', [!Ref ServiceName, AgentCluster]]
+#   AgentCluster:
+#     Type: AWS::ECS::Cluster
+#     Properties:
+#       ClusterName: !Join ['', [!Ref ServiceName, AgentCluster]]
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     # Makes sure the log group is created before it is used.
@@ -171,24 +171,24 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole'
-  ContainerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Join ['', [!Ref ServiceName, ContainerSecurityGroup]]
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: !Ref ContainerPort
-          ToPort: !Ref ContainerPort
-          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 50000
-          ToPort: 50000
-          SourceSecurityGroupId: !Ref AgentSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 50000
-          ToPort: 50000
-          CidrIp: 0.0.0.0/0  # needed for NLB healthchecks
+#   ContainerSecurityGroup:
+#     Type: AWS::EC2::SecurityGroup
+#     Properties:
+#       GroupDescription: !Join ['', [!Ref ServiceName, ContainerSecurityGroup]]
+#       VpcId: !Ref VPC
+#       SecurityGroupIngress:
+#         - IpProtocol: tcp
+#           FromPort: !Ref ContainerPort
+#           ToPort: !Ref ContainerPort
+#           SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+#         - IpProtocol: tcp
+#           FromPort: 50000
+#           ToPort: 50000
+#           SourceSecurityGroupId: !Ref AgentSecurityGroup
+#         - IpProtocol: tcp
+#           FromPort: 50000
+#           ToPort: 50000
+#           CidrIp: 0.0.0.0/0  # needed for NLB healthchecks
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -199,11 +199,11 @@ Resources:
           FromPort: !Ref LoadBalancerPort
           ToPort: !Ref LoadBalancerPort
           CidrIp: 0.0.0.0/0
-  AgentSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Join ['', [!Ref ServiceName, AgentSecurityGroup]]
-      VpcId: !Ref VPC
+#   AgentSecurityGroup:
+#     Type: AWS::EC2::SecurityGroup
+#     Properties:
+#       GroupDescription: !Join ['', [!Ref ServiceName, AgentSecurityGroup]]
+#       VpcId: !Ref VPC
   Service:
     Type: AWS::ECS::Service
     # This dependency is needed so that the load balancer is setup correctly in time
@@ -277,37 +277,37 @@ Resources:
         - !Ref SubnetA
         - !Ref SubnetB
 
-  NetworkLoadBalancerTargetGroup:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
-    Properties:
-      Port: 50000
-      Protocol: TCP
-      VpcId: !Ref VPC
-      TargetType: ip
-      HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 2
+#   NetworkLoadBalancerTargetGroup:
+#     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+#     Properties:
+#       Port: 50000
+#       Protocol: TCP
+#       VpcId: !Ref VPC
+#       TargetType: ip
+#       HealthyThresholdCount: 2
+#       UnhealthyThresholdCount: 2
 
-  NetworkLoadBalancerListener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions:
-      - Type: forward
-        TargetGroupArn: !Ref NetworkLoadBalancerTargetGroup
-      LoadBalancerArn: !Ref NetworkLoadBalancer
-      Port: 50000
-      Protocol: TCP
+#   NetworkLoadBalancerListener:
+#     Type: AWS::ElasticLoadBalancingV2::Listener
+#     Properties:
+#       DefaultActions:
+#       - Type: forward
+#         TargetGroupArn: !Ref NetworkLoadBalancerTargetGroup
+#       LoadBalancerArn: !Ref NetworkLoadBalancer
+#       Port: 50000
+#       Protocol: TCP
 
-  NetworkLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Scheme: internal
-      Type: network
-      Subnets:
-        - !Ref SubnetA
-        - !Ref SubnetB
-      LoadBalancerAttributes:
-      - Key: load_balancing.cross_zone.enabled
-        Value: "true"
+#   NetworkLoadBalancer:
+#     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+#     Properties:
+#       Scheme: internal
+#       Type: network
+#       Subnets:
+#         - !Ref SubnetA
+#         - !Ref SubnetB
+#       LoadBalancerAttributes:
+#       - Key: load_balancing.cross_zone.enabled
+#         Value: "true"
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
