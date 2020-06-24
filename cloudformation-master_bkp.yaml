@@ -24,10 +24,6 @@ Parameters:
   HealthCheckPath:
     Type: String
     Default: /
-  ECRRepository:
-    Type: String
-    Description: Please provide the image and tag
-    Default: sample-application:latest
 #   HostedZoneName:
 #     Type: String
 #     Default: company.com
@@ -35,65 +31,6 @@ Parameters:
 #     Type: String
 #     Default: jenkins
 Resources:
-  CustomResourceFunction:
-    Type: 'AWS::Lambda::Function'
-    DependsOn: MyLayer
-    Properties:
-      Code:
-        ZipFile: |
-          const aws = require('aws-sdk')
-          const response = require('cfn-response')
-          const ecs = new aws.ECS({apiVersion: '2014-11-13'})
-          exports.handler = function(event, context) {
-            console.log("REQUEST RECEIVED:\n" + JSON.stringify(event))
-            if (event.RequestType === 'Create' || event.RequestType === 'Update') {
-              ecs.registerTaskDefinition(event.ResourceProperties.TaskDefinition, function(err, data) {
-                if (err) {
-                  console.error(err);
-                  response.send(event, context, response.FAILED)
-                } else {
-                  console.log(`Created/Updated task definition ${data.taskDefinition.taskDefinitionArn}`)
-                  response.send(event, context, response.SUCCESS, {}, data.taskDefinition.taskDefinitionArn)
-                }
-              })
-            } else if (event.RequestType === 'Delete') {
-              ecs.deregisterTaskDefinition({taskDefinition: event.PhysicalResourceId}, function(err) {
-                if (err) {
-                  if (err.code === 'InvalidParameterException') {
-                    console.log(`Task definition: ${event.PhysicalResourceId} does not exist. Skipping deletion.`)
-                    response.send(event, context, response.SUCCESS)
-                  } else {
-                    console.error(err)
-                    response.send(event, context, response.FAILED)
-                  }
-                } else {
-                  console.log(`Removed task definition ${event.PhysicalResourceId}`)
-                  response.send(event, context, response.SUCCESS)
-                }
-              })
-            } else {
-              console.error(`Unsupported request type: ${event.RequestType}`)
-              response.send(event, context, response.FAILED)
-            }
-          }
-      Handler: 'index.handler'
-      MemorySize: 128
-      Role: !Ref LambdaRole
-      # Role: arn:aws:iam::982468706400:role/ECSCustomResourceRole
-      Runtime: 'nodejs12.x'
-      Timeout: 30
-      Layers:
-        - !Ref MyLayer
-  MyLayer:
-    Type: AWS::Lambda::LayerVersion
-    Properties:
-      CompatibleRuntimes:
-        - nodejs12.x
-      Content:
-        S3Bucket: bah-lambda-layer
-        S3Key: package.zip
-      Description: Updated layer to run ECS lambda function
-      LayerName: my-layer
   Cluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -267,94 +204,6 @@ Resources:
 #     Properties:
 #       GroupDescription: !Join ['', [!Ref ServiceName, AgentSecurityGroup]]
 #       VpcId: !Ref VPC
-  TaskDefinition:
-    Type: 'Custom::TaskDefinition'
-    DependsOn: LogGroup
-    Version: '1.0'
-    Properties:
-      ServiceToken: !GetAtt 'CustomResourceFunction.Arn'
-      TaskDefinition: {
-        containerDefinitions: [
-          {
-          logConfiguration: {
-            logDriver: "awslogs",
-            options: {
-              awslogs-group: !Ref LogGroup,
-              # awslogs-region: us-east-1,
-              awslogs-region: !Ref AWS::Region,
-              awslogs-stream-prefix: "ecs"
-            }
-          },
-            # name: "jenkins",
-            name: !Ref ServiceName
-            portMappings: [
-            # {
-            #   hostPort: 8443,
-            #   protocol: "tcp",
-            #   containerPort: 8443
-            # },
-            {
-              # hostPort: 8080,
-              hostPort: !Ref ContainerPort,
-              protocol: "tcp",
-              containerPort: !Ref ContainerPort
-              # containerPort: !Ref PortMapping1
-            },
-            # {
-            #   # hostPort: 50000,
-            #   hostPort: !Ref PortMapping2,
-            #   protocol: "tcp",
-            #   # containerPort: 50000
-            #   containerPort: !Ref PortMapping2
-            # }
-            ],
-            # image: "982468706400.dkr.ecr.us-east-1.amazonaws.com/jenkins:v2.150.1",
-            image: !Join [ ".", [ !Ref "AWS::AccountId", "dkr.ecr", !Ref "AWS::Region", !Join [ "/", [ "amazonaws.com", !Ref "ECRRepository" ] ] ] ],
-            # entryPoint: [
-            #   "/sbin/tini",
-            #   "--",
-            #   "/usr/local/bin/jenkins.sh",
-            #   "--httpPort=-1",
-            #   "--httpsPort=8443",
-            #   "--httpsKeyStore=/var/jenkins_home/jenkins_keystore.jks",
-            #   "--httpsKeyStorePassword=mypassword",
-            #   "--logfile=/var/jenkins_home/logs/jenkins.log"
-            # ],
-            mountPoints: [
-              {sourceVolume: "Jenkins-Data", containerPath: "/var/jenkins_home"}
-            ]
-          }
-        ],
-        # family: "jenkins-erick",
-        family: !Join ['', [!Ref ServiceName, TaskDefinition]]
-        # compatibilities: [
-        # "FARGATE",
-        # "EC2"
-        # ],
-        # taskRoleArn: "arn:aws:iam::982468706400:role/ecsTaskExecutionRole", # required for EFS permissions
-        # executionRoleArn: "arn:aws:iam::982468706400:role/ecsTaskExecutionRole",
-        taskRoleArn: !Ref ExecutionRole,
-        executionRoleArn: !Ref TaskRole,
-        cpu: "512",
-        memory: "2048",
-        requiresCompatibilities: [
-        "FARGATE"
-        ],
-        volumes: [
-          {
-            name: "Jenkins-Data",
-            efsVolumeConfiguration: {
-              fileSystemId: "fs-3bf56bb8", # required for EFS #change for CSN
-              transitEncryption: "ENABLED",
-              authorizationConfig: {
-                accessPointId: "fsmt-dba3775b", #change for CSN
-                iam: 'DISABLED'
-              }
-            }
-          }
-        ],
-        networkMode: "awsvpc"
-      }
   Service:
     Type: AWS::ECS::Service
     # This dependency is needed so that the load balancer is setup correctly in time
