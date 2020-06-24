@@ -187,13 +187,13 @@ Resources:
               - "ssm:GetParameter"
             Effect: Allow
             Resource:
-            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/jenkins/*"
+            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sample-application/*"
           -
             Action:
               - "ssm:PutParameter"
             Effect: Allow
             Resource:
-            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/jenkins/*"
+            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sample-application/*"
           -
             Action:
             - "kms:Decrypt"
