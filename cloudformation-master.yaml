@@ -23,7 +23,7 @@ Parameters:
     Default: 443
   HealthCheckPath:
     Type: String
-    Default: /login
+    Default: /
   HostedZoneName:
     Type: String
     Default: company.com
