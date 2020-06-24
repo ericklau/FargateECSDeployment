@@ -3,12 +3,12 @@ Description: Template for sample application on Fargate with EFS - ECR repo
 Parameters:
   ServiceName:
     Type: String
-    Default: ECSJenkins
+    Default: ECSSampleApplication
 Resources:
   ECRRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: jenkins-master
+      RepositoryName: sample-application
       RepositoryPolicyText:
         Version: '2008-10-17'
         Statement:
