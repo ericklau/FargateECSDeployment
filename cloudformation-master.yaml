@@ -171,24 +171,24 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole'
-#   ContainerSecurityGroup:
-#     Type: AWS::EC2::SecurityGroup
-#     Properties:
-#       GroupDescription: !Join ['', [!Ref ServiceName, ContainerSecurityGroup]]
-#       VpcId: !Ref VPC
-#       SecurityGroupIngress:
-#         - IpProtocol: tcp
-#           FromPort: !Ref ContainerPort
-#           ToPort: !Ref ContainerPort
-#           SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
-#         - IpProtocol: tcp
-#           FromPort: 50000
-#           ToPort: 50000
-#           SourceSecurityGroupId: !Ref AgentSecurityGroup
-#         - IpProtocol: tcp
-#           FromPort: 50000
-#           ToPort: 50000
-#           CidrIp: 0.0.0.0/0  # needed for NLB healthchecks
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Join ['', [!Ref ServiceName, ContainerSecurityGroup]]
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref ContainerPort
+          ToPort: !Ref ContainerPort
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 50000
+          ToPort: 50000
+          SourceSecurityGroupId: !Ref AgentSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 50000
+          ToPort: 50000
+          CidrIp: 0.0.0.0/0  # needed for NLB healthchecks
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
