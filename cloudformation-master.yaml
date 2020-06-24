@@ -252,7 +252,7 @@ Resources:
           Value: 90 # default is 300
       TargetType: ip
       VpcId: !Ref VPC
-  ListenerHTTPS:
+  ListenerHTTP:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
