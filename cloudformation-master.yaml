@@ -293,7 +293,7 @@ Resources:
               options: {
                 awslogs-group: {"Ref" : "LogGroup" },
                 awslogs-region: {"Fn::Sub" :  "${AWS::Region}"},
-                awslogs-stream-prefix": "sample-app-ecs"
+                awslogs-stream-prefix: "sample-app-ecs"
               },
             },
             # image: !Join [ ".", [ !Ref "AWS::AccountId", "dkr.ecr", !Ref "AWS::Region", !Join [ "/", [ "amazonaws.com", !Ref "ECRRepository" ] ] ] ],
