@@ -93,7 +93,7 @@ Resources:
       CompatibleRuntimes:
         - nodejs12.x
       Content:
-        S3Bucket: bah-lambda-layer
+        S3Bucket: erickson-lambda-layer
         S3Key: package.zip
       Description: Updated layer to run ECS lambda function
       LayerName: my-layer
