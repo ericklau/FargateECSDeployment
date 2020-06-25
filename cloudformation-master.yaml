@@ -340,6 +340,7 @@ Resources:
         MinimumHealthyPercent: 100
         MaximumPercent: 200
       DesiredCount: 1
+      PlatformVersion: 1.3.0
       # This may need to be adjusted if the container takes a while to start up
       HealthCheckGracePeriodSeconds: 150
       LaunchType: FARGATE
