@@ -1,8 +1,24 @@
-FROM node:alpine as builder
-WORKDIR '/app'
-COPY package*.json ./
-RUN npm i ajv
-RUN npm install
-RUN npm install ip
-COPY . .
-CMD ["npm","start"]
+# pull official base image
+FROM node:13.12.0-alpine
+
+# set working directory
+WORKDIR /app
+
+# add '/app/node_modules/.bin' to $PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
+# install app dependencies
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm install --silent 
+
+# create uploads
+RUN mkdir uploads
+
+# add app
+COPY . ./
+
+EXPOSE 8080
+
+# start app
+CMD ["node", "server.js"]

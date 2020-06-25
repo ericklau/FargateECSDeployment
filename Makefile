@@ -35,7 +35,7 @@ docker:
 
 deploy-master:
 	aws cloudformation deploy \
-		--template-file cloudformation-master.yaml \
+		--template-file cloudformation-master_bkp.yaml \
 		--stack-name $(stackName) \
 		--parameter-overrides $(shell cat parameters.properties) \
 		--capabilities CAPABILITY_NAMED_IAM \
