@@ -297,7 +297,7 @@ Resources:
               },
             },
             # image: !Join [ ".", [ !Ref "AWS::AccountId", "dkr.ecr", !Ref "AWS::Region", !Join [ "/", [ "amazonaws.com", !Ref "ECRRepository" ] ] ] ],
-            image: [{"Fn::ImportValue" : {"Fn::Sub" : "${ServiceName}-docker-uri"}}],
+            image: {"Fn::ImportValue" : {"Fn::Sub" : "${ServiceName}-docker-uri"}},
             mountPoints: [
               {sourceVolume: "efs", containerPath: "app/uploads"}
             ]
