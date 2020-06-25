@@ -13,7 +13,7 @@ help:
 debug-master:
 	aws --version
 	aws sts get-caller-identity
-	aws cloudformation describe-stack-events --stack-name $(stackName)-master
+	aws cloudformation describe-stack-events --stack-name $(stackName)
 
 deploy-ecr:
 	aws configure set region us-east-1
@@ -35,13 +35,13 @@ docker:
 
 deploy-master:
 	aws cloudformation deploy \
-		--template-file cloudformation-master_bkp.yaml \
+		--template-file cloudformation-master.yaml \
 		--stack-name $(stackName) \
 		--parameter-overrides $(shell cat parameters.properties) \
 		--capabilities CAPABILITY_NAMED_IAM \
 		--no-fail-on-empty-changeset
 
 	@aws cloudformation describe-stacks \
-		--stack-name $(stackName)-master \
+		--stack-name $(stackName) \
 		--output text \
 		--query Stacks[0].Outputs[*].OutputValue
