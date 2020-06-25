@@ -26,7 +26,7 @@ Parameters:
     Default: /
   LambdaRole:
     Type: String
-    Default: arn:aws:iam::982468706400:role/ECSCustomResourceRole
+    Default: arn:aws:iam::346201684737:role/ECSCustomResourceRole
   ECRRepository:
     Type: String
     Description: Please provide the image and tag
