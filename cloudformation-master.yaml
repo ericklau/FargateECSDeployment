@@ -7,14 +7,14 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
   SubnetB:
     Type: AWS::EC2::Subnet::Id
-#   Certificate:
-#     Type: String
-#     # Update with the certificate ARN from Certificate Manager, which must exist in the same region.
-#     Default: 'arn:aws:iam::346201684737:server-certificate/ExampleCertificate'
+  Certificate:
+    Type: String
+    # Update with the certificate ARN from Certificate Manager, which must exist in the same region.
+    Default: 'arn:aws:iam::346201684737:server-certificate/ExampleCertificate'
   ServiceName:
     Type: String
     # update with the name of the service
-    Default: ECSJenkins
+    Default: sample-application
   ContainerPort:
     Type: Number
     Default: 3000
@@ -24,6 +24,9 @@ Parameters:
   HealthCheckPath:
     Type: String
     Default: /
+  LambdaRole:
+    Type: String
+    Default: arn:aws:iam::982468706400:role/ECSCustomResourceRole
   ECRRepository:
     Type: String
     Description: Please provide the image and tag
@@ -102,76 +105,76 @@ Resources:
 #     Type: AWS::ECS::Cluster
 #     Properties:
 #       ClusterName: !Join ['', [!Ref ServiceName, AgentCluster]]
-  TaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    # Makes sure the log group is created before it is used.
-    DependsOn: LogGroup
-    Properties:
-      # Name of the task definition. Subsequent versions of the task definition are grouped together under this name.
-      Family: !Join ['', [!Ref ServiceName, TaskDefinition]]
-      # awsvpc is required for Fargate
-      NetworkMode: awsvpc
-      RequiresCompatibilities:
-        - FARGATE
-      # 256 (.25 vCPU) - Available memory values: 0.5GB, 1GB, 2GB
-      # 512 (.5 vCPU) - Available memory values: 1GB, 2GB, 3GB, 4GB
-      # 1024 (1 vCPU) - Available memory values: 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB
-      # 2048 (2 vCPU) - Available memory values: Between 4GB and 16GB in 1GB increments
-      # 4096 (4 vCPU) - Available memory values: Between 8GB and 30GB in 1GB increments
-      Cpu: '1024'
-      # 0.5GB, 1GB, 2GB - Available cpu values: 256 (.25 vCPU)
-      # 1GB, 2GB, 3GB, 4GB - Available cpu values: 512 (.5 vCPU)
-      # 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB - Available cpu values: 1024 (1 vCPU)
-      # Between 4GB and 16GB in 1GB increments - Available cpu values: 2048 (2 vCPU)
-      # Between 8GB and 30GB in 1GB increments - Available cpu values: 4096 (4 vCPU)
-      Memory: '3GB'
-      # A role needed by ECS.
-      # "The ARN of the task execution role that containers in this task can assume. All containers in this task are granted the permissions that are specified in this role."
-      # "There is an optional task execution IAM role that you can specify with Fargate to allow your Fargate tasks to make API calls to Amazon ECR."
-      ExecutionRoleArn: !Ref ExecutionRole
-      # "The Amazon Resource Name (ARN) of an AWS Identity and Access Management (IAM) role that grants containers in the task permission to call AWS APIs on your behalf."
-      TaskRoleArn: !Ref TaskRole
-      ContainerDefinitions:
-        - Name: !Ref ServiceName
-          Image:
-            Fn::ImportValue: !Sub ${ServiceName}-docker-uri
-          PortMappings:
-            - ContainerPort: !Ref ContainerPort
-            - ContainerPort: 50000
-          # Send logs to CloudWatch Logs
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-region: !Ref AWS::Region
-              awslogs-group: !Ref LogGroup
-              awslogs-stream-prefix: ecs
-          Environment:
-          - Name: JENKINS_URL
-            # Value: !Ref DNSRecord
-            Value: !GetAtt LoadBalancer.DNSName
-          - Name: JENKINS_HOST
-            # Value: !Ref DNSRecord
-            Value: !GetAtt LoadBalancer.DNSName
-          - Name: NLB_PORT
-            Value: '50000'
-          # - Name: NLB_TARGET_GROUP_ARN
-          #   Value: !Ref NetworkLoadBalancerTargetGroup
-          # - Name: NLB_DNS_NAME
-          #   Value: !GetAtt NetworkLoadBalancer.DNSName
-          # - Name: ECS_AGENT_CLUSTER
-          #   Value: !GetAtt AgentCluster.Arn
-          - Name: AWS_DEFAULT_REGION
-            Value: !Ref AWS::Region
-          - Name: ACCOUNT_ID
-            Value: !Ref AWS::AccountId
-          - Name: JENKINS_SLAVE_AGENT_PORT
-            Value: '50000'
-          # - Name: AGENT_SECURITY_GROUP
-          #   Value: !GetAtt AgentSecurityGroup.GroupId
-          - Name: SUBNETS
-            Value: !Sub "${SubnetA},${SubnetB}"
-          - Name: VPC
-            Value: !Ref VPC
+  # TaskDefinition:
+  #   Type: AWS::ECS::TaskDefinition
+  #   # Makes sure the log group is created before it is used.
+  #   DependsOn: LogGroup
+  #   Properties:
+  #     # Name of the task definition. Subsequent versions of the task definition are grouped together under this name.
+  #     Family: !Join ['', [!Ref ServiceName, TaskDefinition]]
+  #     # awsvpc is required for Fargate
+  #     NetworkMode: awsvpc
+  #     RequiresCompatibilities:
+  #       - FARGATE
+  #     # 256 (.25 vCPU) - Available memory values: 0.5GB, 1GB, 2GB
+  #     # 512 (.5 vCPU) - Available memory values: 1GB, 2GB, 3GB, 4GB
+  #     # 1024 (1 vCPU) - Available memory values: 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB
+  #     # 2048 (2 vCPU) - Available memory values: Between 4GB and 16GB in 1GB increments
+  #     # 4096 (4 vCPU) - Available memory values: Between 8GB and 30GB in 1GB increments
+  #     Cpu: '1024'
+  #     # 0.5GB, 1GB, 2GB - Available cpu values: 256 (.25 vCPU)
+  #     # 1GB, 2GB, 3GB, 4GB - Available cpu values: 512 (.5 vCPU)
+  #     # 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB - Available cpu values: 1024 (1 vCPU)
+  #     # Between 4GB and 16GB in 1GB increments - Available cpu values: 2048 (2 vCPU)
+  #     # Between 8GB and 30GB in 1GB increments - Available cpu values: 4096 (4 vCPU)
+  #     Memory: '3GB'
+  #     # A role needed by ECS.
+  #     # "The ARN of the task execution role that containers in this task can assume. All containers in this task are granted the permissions that are specified in this role."
+  #     # "There is an optional task execution IAM role that you can specify with Fargate to allow your Fargate tasks to make API calls to Amazon ECR."
+  #     ExecutionRoleArn: !Ref ExecutionRole
+  #     # "The Amazon Resource Name (ARN) of an AWS Identity and Access Management (IAM) role that grants containers in the task permission to call AWS APIs on your behalf."
+  #     TaskRoleArn: !Ref TaskRole
+  #     ContainerDefinitions:
+  #       - Name: !Ref ServiceName
+  #         Image:
+  #           Fn::ImportValue: !Sub ${ServiceName}-docker-uri
+  #         PortMappings:
+  #           - ContainerPort: !Ref ContainerPort
+  #           - ContainerPort: 50000
+  #         # Send logs to CloudWatch Logs
+  #         LogConfiguration:
+  #           LogDriver: awslogs
+  #           Options:
+  #             awslogs-region: !Ref AWS::Region
+  #             awslogs-group: !Ref LogGroup
+  #             awslogs-stream-prefix: ecs
+  #         Environment:
+  #         - Name: JENKINS_URL
+  #           # Value: !Ref DNSRecord
+  #           Value: !GetAtt LoadBalancer.DNSName
+  #         - Name: JENKINS_HOST
+  #           # Value: !Ref DNSRecord
+  #           Value: !GetAtt LoadBalancer.DNSName
+  #         - Name: NLB_PORT
+  #           Value: '50000'
+  #         # - Name: NLB_TARGET_GROUP_ARN
+  #         #   Value: !Ref NetworkLoadBalancerTargetGroup
+  #         # - Name: NLB_DNS_NAME
+  #         #   Value: !GetAtt NetworkLoadBalancer.DNSName
+  #         # - Name: ECS_AGENT_CLUSTER
+  #         #   Value: !GetAtt AgentCluster.Arn
+  #         - Name: AWS_DEFAULT_REGION
+  #           Value: !Ref AWS::Region
+  #         - Name: ACCOUNT_ID
+  #           Value: !Ref AWS::AccountId
+  #         - Name: JENKINS_SLAVE_AGENT_PORT
+  #           Value: '50000'
+  #         # - Name: AGENT_SECURITY_GROUP
+  #         #   Value: !GetAtt AgentSecurityGroup.GroupId
+  #         - Name: SUBNETS
+  #           Value: !Sub "${SubnetA},${SubnetB}"
+  #         - Name: VPC
+  #           Value: !Ref VPC
   # A role needed by ECS
   ExecutionRole:
     Type: AWS::IAM::Role
@@ -190,6 +193,8 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Join ['', [!Ref ServiceName, TaskRole]]
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AWSLambdaFullAccess'
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -218,6 +223,10 @@ Resources:
               - "ssm:PutParameter"
               - "kms:Decrypt"
               - "cloudwatch:PutMetricData"
+              - "elasticfilesystem:ClientMount"
+              - "elasticfilesystem:ClientRootAccess"
+              - "elasticfilesystem:ClientWrite"
+              - "elasticfilesystem:DescribeMountTargets"
             Effect: Allow
             Resource: "*"
 
@@ -248,10 +257,10 @@ Resources:
         #   FromPort: 50000
         #   ToPort: 50000
         #   SourceSecurityGroupId: !Ref AgentSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 50000
-          ToPort: 50000
-          CidrIp: 0.0.0.0/0  # needed for NLB healthchecks
+        # - IpProtocol: tcp
+        #   FromPort: 50000
+        #   ToPort: 50000
+        #   CidrIp: 0.0.0.0/0  # needed for NLB healthchecks
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -268,6 +277,8 @@ Resources:
 #       GroupDescription: !Join ['', [!Ref ServiceName, AgentSecurityGroup]]
 #       VpcId: !Ref VPC
   TaskDefinition:
+
+      # ======== delete below =====
     Type: 'Custom::TaskDefinition'
     DependsOn: LogGroup
     Version: '1.0'
@@ -276,90 +287,51 @@ Resources:
       TaskDefinition: {
         containerDefinitions: [
           {
-          logConfiguration: {
-            logDriver: "awslogs",
-            options: {
-              awslogs-group: !Ref LogGroup,
-              # awslogs-region: us-east-1,
-              awslogs-region: !Ref AWS::Region,
-              awslogs-stream-prefix: "ecs"
-            }
-          },
-            # name: "jenkins",
-            name: !Ref ServiceName
-            portMappings: [
-            # {
-            #   hostPort: 8443,
-            #   protocol: "tcp",
-            #   containerPort: 8443
-            # },
-            {
-              # hostPort: 8080,
-              hostPort: !Ref ContainerPort,
-              protocol: "tcp",
-              containerPort: !Ref ContainerPort
-              # containerPort: !Ref PortMapping1
+            name: {"Ref" : "ServiceName"},
+            logConfiguration: {
+              logDriver: "awslogs",
+              options: {
+                awslogs-group: {"Ref" : "LogGroup" },
+                awslogs-region: {"Fn::Sub" :  "${AWS::Region}"},
+                awslogs-stream-prefix": "sample-app-ecs"
+              },
             },
-            # {
-            #   # hostPort: 50000,
-            #   hostPort: !Ref PortMapping2,
-            #   protocol: "tcp",
-            #   # containerPort: 50000
-            #   containerPort: !Ref PortMapping2
-            # }
-            ],
-            # image: "982468706400.dkr.ecr.us-east-1.amazonaws.com/jenkins:v2.150.1",
-            image: !Join [ ".", [ !Ref "AWS::AccountId", "dkr.ecr", !Ref "AWS::Region", !Join [ "/", [ "amazonaws.com", !Ref "ECRRepository" ] ] ] ],
-            # entryPoint: [
-            #   "/sbin/tini",
-            #   "--",
-            #   "/usr/local/bin/jenkins.sh",
-            #   "--httpPort=-1",
-            #   "--httpsPort=8443",
-            #   "--httpsKeyStore=/var/jenkins_home/jenkins_keystore.jks",
-            #   "--httpsKeyStorePassword=mypassword",
-            #   "--logfile=/var/jenkins_home/logs/jenkins.log"
-            # ],
+            # image: !Join [ ".", [ !Ref "AWS::AccountId", "dkr.ecr", !Ref "AWS::Region", !Join [ "/", [ "amazonaws.com", !Ref "ECRRepository" ] ] ] ],
+            image: [{"Fn::ImportValue" : {"Fn::Sub" : "${ServiceName}-docker-uri"}}],
             mountPoints: [
-              {sourceVolume: "Jenkins-Data", containerPath: "/var/jenkins_home"}
+              {sourceVolume: "efs", containerPath: "app/uploads"}
             ]
           }
         ],
-        # family: "jenkins-erick",
-        family: !Join ['', [!Ref ServiceName, TaskDefinition]]
-        # compatibilities: [
-        # "FARGATE",
-        # "EC2"
-        # ],
-        # taskRoleArn: "arn:aws:iam::982468706400:role/ecsTaskExecutionRole", # required for EFS permissions
-        # executionRoleArn: "arn:aws:iam::982468706400:role/ecsTaskExecutionRole",
-        taskRoleArn: !Ref ExecutionRole,
-        executionRoleArn: !Ref TaskRole,
+        family: !Join ['', [!Ref ServiceName, TaskDefinition]],
+        taskRoleArn: {"Ref" : "TaskRole"},
+        executionRoleArn: {"Ref" : "ExecutionRole"},
+        requiresCompatibilities: ["FARGATE"],
+        # taskRoleArn: "arn:aws:iam::346201684737:role/aws-service-role/elasticfilesystem.amazonaws.com/AWSServiceRoleForAmazonElasticFileSystem", # required for EFS permissions
         cpu: "512",
         memory: "2048",
-        requiresCompatibilities: [
-        "FARGATE"
-        ],
+        networkMode: "awsvpc",
         volumes: [
           {
-            name: "Jenkins-Data",
+            name: "efs",
             efsVolumeConfiguration: {
-              fileSystemId: "fs-3bf56bb8", # required for EFS #change for CSN
+              fileSystemId: "fs-3bf56bb8",
               transitEncryption: "ENABLED",
               authorizationConfig: {
-                accessPointId: "fsmt-dba3775b", #change for CSN
+                accessPointId: "fsap-0d3d18066cc20039b", #change for CSN
                 iam: 'DISABLED'
               }
             }
           }
-        ],
-        networkMode: "awsvpc"
+        ]
       }
+
   Service:
     Type: AWS::ECS::Service
     # This dependency is needed so that the load balancer is setup correctly in time
     DependsOn:
       - ListenerHTTP
+      - TaskDefinition
     Properties:
       Cluster: !Ref Cluster
       TaskDefinition: !Ref TaskDefinition
